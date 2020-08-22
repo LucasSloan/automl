@@ -16,8 +16,10 @@
 from typing import List, Tuple
 from absl import logging
 import tensorflow as tf
+import functools
 
 import utils
+import nms_np
 from keras import anchors
 T = tf.Tensor  # a shortcut for typing check.
 CLASS_OFFSET = 1
@@ -367,6 +369,26 @@ def generate_detections(params,
                         image_ids,
                         flip=False):
   """A legacy interface for generating [id, x, y, w, h, score, class]."""
+  if True:
+    detections_bs = []
+    boxes, scores, classes = pre_nms(params, cls_outputs, box_outputs)
+    for index in range(boxes.shape[0]):
+      nms_configs = params['nms_configs']
+      detections = tf.numpy_function(
+          functools.partial(nms_np.per_class_nms, nms_configs=nms_configs),
+          [
+              boxes[index],
+              scores[index],
+              classes[index],
+              tf.slice(image_ids, [index], [1]),
+              tf.slice(image_scales, [index], [1]),
+              params['num_classes'],
+              nms_configs['max_output_size'],
+          ], tf.float32)
+      detections_bs.append(detections)
+    return tf.stack(detections_bs, axis=0, name='detnections')
+
+
   nms_boxes_bs, nms_scores_bs, nms_classes_bs, _ = postprocess_per_class(
       params, cls_outputs, box_outputs, image_scales)
 

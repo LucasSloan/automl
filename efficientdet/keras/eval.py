@@ -88,11 +88,11 @@ def main(_):
 
     # compute stats for all batches.
     total_steps = FLAGS.eval_samples // FLAGS.batch_size
-    progress = tf.keras.utils.Progbar(total_steps)
+    # progress = tf.keras.utils.Progbar(total_steps)
     for i, (images, labels) in enumerate(ds):
-      progress.update(i, values=None)
-      if i > total_steps:
-        break
+      # progress.update(i, values=None)
+      # if i > total_steps:
+      #   break
 
       if flip:
         images = tf.image.flip_left_right(images)
@@ -120,12 +120,12 @@ def main(_):
     for i, name in enumerate(evaluator.metric_names):
       metric_dict[name] = metrics[i]
 
-    label_map = label_util.get_label_map(config.label_map)
-    if label_map:
-      for i, cid in enumerate(sorted(label_map.keys())):
-        name = 'AP_/%s' % label_map[cid]
-        metric_dict[name] = metrics[i - len(evaluator.metric_names)]
-    print(metric_dict)
+    # label_map = label_util.get_label_map(config.label_map)
+    # if label_map:
+    #   for i, cid in enumerate(sorted(label_map.keys())):
+    #     name = 'AP_/%s' % label_map[cid]
+    #     metric_dict[name] = metrics[i - len(evaluator.metric_names)]
+    # print(metric_dict)
 
 
 if __name__ == '__main__':
